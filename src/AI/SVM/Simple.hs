@@ -1,5 +1,9 @@
-{-# LANGUAGE ScopedTypeVariables, TupleSections, ViewPatterns,
-             RecordWildCards, FlexibleInstances, ForeignFunctionInterface #-}
+{-# LANGUAGE FlexibleInstances        #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE RecordWildCards          #-}
+{-# LANGUAGE ScopedTypeVariables      #-}
+{-# LANGUAGE TupleSections            #-}
+{-# LANGUAGE ViewPatterns             #-}
 -------------------------------------------------------------------------------
 -- |
 -- Module     : Bindings.SVM
@@ -49,26 +53,26 @@ module AI.SVM.Simple (
                  ,Persisting(..)
                  )  where
 
-import AI.SVM.Base
-import AI.SVM.Common
-import Control.Applicative
-import Control.Arrow (first, second, (***), (&&&))
-import Control.DeepSeq
-import Control.Monad
-import Data.Binary
-import Data.Foldable (Foldable)
-import Data.Function
-import Data.List
-import Data.Map (Map)
-import Data.Monoid
-import Data.Tuple
-import Foreign.C.Types (CInt(..))
-import System.Directory
-import System.IO.Unsafe
-import qualified Control.Monad.Par as P
+import           AI.SVM.Base
+import           AI.SVM.Common
+import           Control.Applicative
+import           Control.Arrow        (first, second, (&&&), (***))
+import           Control.DeepSeq
+import           Control.Monad
+import qualified Control.Monad.Par    as P
+import           Data.Binary
 import qualified Data.ByteString.Lazy as B
-import qualified Data.Foldable as F
-import qualified Data.Map as Map
+import           Data.Foldable        (Foldable)
+import qualified Data.Foldable        as F
+import           Data.Function
+import           Data.List
+import           Data.Map             (Map)
+import qualified Data.Map             as Map
+import           Data.Monoid
+import           Data.Tuple
+import           Foreign.C.Types      (CInt (..))
+import           System.Directory
+import           System.IO.Unsafe
 
 
 -- | Supported SVM classifiers
@@ -103,10 +107,10 @@ instance Binary SVMOneClass where
     put (SVMOneClass r) = put r
     get = SVMOneClass <$> get
 
-generalizeClassifier C{..} = C_SVC{cost_=cost}
+generalizeClassifier C{..}  = C_SVC{cost_=cost}
 generalizeClassifier NU{..} = NU_SVC{cost_=cost, nu_=nu}
 
-generalizeRegressor (NU_r cost nu)  = NU_SVR{cost_=cost, nu_=nu}
+generalizeRegressor (NU_r cost nu)     = NU_SVR{cost_=cost, nu_=nu}
 generalizeRegressor (Epsilon cost eps) = EPSILON_SVR{cost_=cost, epsilon_=eps}
 
 -- | A class for things that can be saved to file (i.e. stuff that can't be serialized into memory)
@@ -234,7 +238,7 @@ instance NFData ChehLinResult where rnf x = seq x ()
 
 
 -- | Train an RBF classifier using crossvalidation and parameter grid search. This is the
---   recommended way of building classifiers for small to medium size datasets.  
+--   recommended way of building classifiers for small to medium size datasets.
 chehLin :: (Foldable f, SVMVector b, NFData a, Ord a) =>
             f (a,b) -> (ChehLinResult,SVMClassifier a)
 chehLin v = (Result c s a,clf)
